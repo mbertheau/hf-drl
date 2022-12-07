@@ -1,0 +1,9 @@
+box2d
+box2d-kengz # ???
+huggingface_sb3
+pyglet==1.5.11
+stable-baselines3[extra]
+swig<4
+gym[box2d]
+black
+pygame
