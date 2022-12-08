@@ -1,13 +1,27 @@
 import gym
-from stable_baselines3 import A2C
+from stable_baselines3 import A2C, PPO
 
-env = gym.make("LunarLander-v2")
-model = A2C("MlpPolicy", env).learn(10000)
+env_name = "LunarLander-v2"
 
-env = gym.make("LunarLander-v2", render_mode="human")
-obs, info = env.reset()
-print(f"Observation after reset: {obs}")
-for i in range(1000):
-    action, _state = model.predict(obs, deterministic=True)
-    obs, reward, terminated, truncated, info = env.step(action)
-    env.render()
+n_steps = 50_000
+
+models = {}
+
+print("Training A2C model")
+models["A2C"] = A2C("MlpPolicy", env_name).learn(n_steps)
+
+print("Training PPO model")
+models["PPO"] = PPO("MlpPolicy", env_name).learn(n_steps)
+
+env = gym.make(env_name, render_mode="human")
+for model_name, model in models.items():
+    print(f"Demoing {model_name}")
+    obs, info = env.reset()
+    for i in range(1000):
+        action, _state = model.predict(obs, deterministic=True)
+        obs, reward, terminated, truncated, info = env.step(action)
+
+        env.render()
+
+        if terminated or truncated:
+            break
