@@ -1,20 +1,26 @@
+from simple_term_menu import TerminalMenu
+import sys
 import gym
 from stable_baselines3 import A2C, PPO
 
 env_name = "LunarLander-v2"
 
-n_steps = 50_000
+n_steps = 100_000
 
-models = {}
+models = {
+    "A2C": A2C("MlpPolicy", env_name),
+    "PPO": PPO("MlpPolicy", env_name),
+}
 
-print("Training A2C model")
-models["A2C"] = A2C("MlpPolicy", env_name).learn(n_steps)
 
-print("Training PPO model")
-models["PPO"] = PPO("MlpPolicy", env_name).learn(n_steps)
+def train_more(model_name):
+    print(f"Training {model_name} model for {n_steps} steps")
+    models[model_name] = models[model_name].learn(n_steps)
 
-env = gym.make(env_name, render_mode="human")
-for model_name, model in models.items():
+
+def demo(model_name):
+    env = gym.make(env_name, render_mode="human")
+    model = models[model_name]
     print(f"Demoing {model_name}")
     obs, info = env.reset()
     for i in range(1000):
@@ -23,5 +29,28 @@ for model_name, model in models.items():
 
         env.render()
 
-        if terminated or truncated:
+        if terminated:
+            print("Terminated.")
             break
+
+        if truncated:
+            print("Truncated.")
+            break
+
+    env.close()
+
+
+actions = []
+options = []
+
+for model_name in models.keys():
+    options.append(f"Train {model_name} for {n_steps} more steps")
+    actions.append(lambda model_name=model_name: train_more(model_name))
+    options.append(f"Demo {model_name}")
+    actions.append(lambda model_name=model_name: demo(model_name))
+
+options.append("Exit")
+actions.append(lambda: sys.exit(0))
+
+while True:
+    actions[TerminalMenu(options).show()]()
