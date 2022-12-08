@@ -8,8 +8,19 @@ env_name = "LunarLander-v2"
 n_steps = 100_000
 
 models = {
-    "A2C": A2C("MlpPolicy", env_name),
-    "PPO": PPO("MlpPolicy", env_name),
+    "A2C": A2C("MlpPolicy", env_name, verbose=1),
+    "PPO": PPO("MlpPolicy", env_name, verbose=1),
+    "PPO2": PPO(
+        "MlpPolicy",
+        env_name,
+        n_steps=1024,
+        batch_size=64,
+        n_epochs=4,
+        gamma=0.999,
+        gae_lambda=0.98,
+        ent_coef=0.01,
+        verbose=1,
+    ),
 }
 
 
