@@ -11,12 +11,16 @@ env_name = "LunarLander-v2"
 
 n_steps = 100_000
 
+TORCH_DEVICE = "cpu"
+
+
 models = {
-    "A2C": A2C("MlpPolicy", env_name, verbose=1),
-    "PPO": PPO("MlpPolicy", env_name, verbose=1),
+    "A2C": A2C("MlpPolicy", env_name, device=TORCH_DEVICE),
+    "PPO": PPO("MlpPolicy", env_name, device=TORCH_DEVICE, verbose=1),
     "PPO2": PPO(
         "MlpPolicy",
         env_name,
+        device=TORCH_DEVICE,
         n_steps=1024,
         batch_size=64,
         n_epochs=4,
