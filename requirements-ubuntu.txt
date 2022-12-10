@@ -1,0 +1,6 @@
+box2d
+simple-term-menu
+huggingface_sb3
+git+https://github.com/carlosluis/stable-baselines3@fix_tests
+gym[box2d]
+black
