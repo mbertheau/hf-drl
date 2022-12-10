@@ -6,6 +6,7 @@ from gym.utils.play import PlayPlot
 
 # gym.envs.box2d.lunar_lander.INITIAL_RANDOM = 10
 from stable_baselines3 import A2C, PPO
+from stable_baselines3.common.evaluation import evaluate_policy
 
 env_name = "LunarLander-v2"
 
@@ -111,17 +112,62 @@ def demo_model(model_name):
     del plotter
 
 
-actions = []
-options = []
+def save_model(model_name):
+    fname = input("Name: ")
+    models[model_name].save(fname)
 
-for model_name in models.keys():
-    options.append(f"Train {model_name} for {n_steps} more steps")
-    actions.append(lambda model_name=model_name: train_more(model_name))
-    options.append(f"Demo {model_name}")
-    actions.append(lambda model_name=model_name: demo(model_name))
 
-options.append("Exit")
-actions.append(lambda: sys.exit(0))
+def eval_model(model_name, model=None):
+    if not model:
+        model = models[model_name]
+    env = gym.make(env_name)
+    mean_reward, std_reward = evaluate_policy(
+        model, env, n_eval_episodes=10, deterministic=True
+    )
+    print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
 
-while True:
-    actions[TerminalMenu(options).show()]()
+    return mean_reward - std_reward
+
+
+class Return(Exception):
+    pass
+
+
+def do_return():
+    raise Return
+
+
+def model_menu(model_name):
+    options = ["Find good", "Train", "Evaluate", "Demo", "Save", "Exit"]
+    actions = [
+        lambda: find_good_model(model_name),
+        lambda: train_model(model_name),
+        lambda: eval_model(model_name),
+        lambda: demo_model(model_name),
+        lambda: save_model(model_name),
+        do_return,
+    ]
+
+    while True:
+        try:
+            actions[TerminalMenu(options).show()]()
+        except Return:
+            return
+
+
+def main():
+    actions = []
+    options = []
+
+    for model_name in models.keys():
+            options.append(f"Select model {model_name}")
+            actions.append(lambda model_name=model_name: model_menu(model_name))
+
+    options.append("Exit")
+    actions.append(lambda: sys.exit(0))
+
+    while True:
+        actions[TerminalMenu(options).show()]()
+
+
+main()
