@@ -1,7 +1,10 @@
 from simple_term_menu import TerminalMenu
 import sys
 import gym
+import gym.envs.box2d.lunar_lander
 from gym.utils.play import PlayPlot
+
+# gym.envs.box2d.lunar_lander.INITIAL_RANDOM = 10
 from stable_baselines3 import A2C, PPO
 
 env_name = "LunarLander-v2"
