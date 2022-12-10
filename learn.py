@@ -1,6 +1,7 @@
 from simple_term_menu import TerminalMenu
 import sys
 import gym
+from gym.utils.play import PlayPlot
 from stable_baselines3 import A2C, PPO
 
 env_name = "LunarLander-v2"
@@ -29,7 +30,33 @@ def train_more(model_name):
     models[model_name] = models[model_name].learn(n_steps)
 
 
-def demo(model_name):
+"""
+Possible strategy:
+train several models from scratch, pick one that converges quickly
+i.e. always train 10 in parallel
+select quickest converging and train 10 copies
+
+"""
+
+
+cum_rew = 0
+
+
+def demo_model(model_name):
+    global cum_rew
+    cum_rew = 0
+
+    def callback(obs_t, obs_tp1, action, rew, terminated, truncated, info):
+        global cum_rew
+        cum_rew += rew
+        print(f"Reward: {cum_rew}")
+        if terminated or truncated:
+            print(f"Resetting cumulative reward, reached {cum_rew} this time.")
+            cum_rew = 0
+        return [cum_rew]
+
+    plotter = PlayPlot(callback, 30 * 5, ["reward"])
+
     env = gym.make(env_name, render_mode="human")
     model = models[model_name]
     print(f"Demoing {model_name}")
@@ -40,6 +67,8 @@ def demo(model_name):
 
         env.render()
 
+        plotter.callback(obs, obs, action, reward, terminated, truncated, info)
+
         if terminated:
             print("Terminated.")
             break
@@ -49,6 +78,8 @@ def demo(model_name):
             break
 
     env.close()
+    del env
+    del plotter
 
 
 actions = []
