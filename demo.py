@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
+
 from gym.utils.play import PlayPlot
+import common
 import sys
 from stable_baselines3 import PPO
 import gym
@@ -17,17 +20,13 @@ def callback(obs_t, obs_tp1, action, rew, terminated, truncated, info):
 
 
 def demo(model_name):
-    algorithm = "PPO"
-
-    env_name = "LunarLander-v2"
-
-    assert model_name.startswith(f"{algorithm}-{env_name}")
+    assert model_name.startswith(f"{common.ALGORITHM}-{common.ENV_NAME}")
 
     model = PPO.load(model_name)
 
     plotter = PlayPlot(callback, 30 * 5, ["reward"])
 
-    env = gym.make(env_name, render_mode="human")
+    env = gym.make(common.ENV_NAME, render_mode="human")
     obs, info = env.reset()
     for i in range(1000):
         action, _state = model.predict(obs, deterministic=True)

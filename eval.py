@@ -1,18 +1,17 @@
+#!/usr/bin/env python3
+
+import common
 import sys
 import gym
 from stable_baselines3 import PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 
 def eval(model_name):
-    algorithm = "PPO"
-
-    env_name = "LunarLander-v2"
-
-    assert model_name.startswith(f"{algorithm}-{env_name}")
+    assert model_name.startswith(f"{common.ALGORITHM}-{common.ENV_NAME}")
 
     model = PPO.load(model_name)
 
-    env = gym.make(env_name)
+    env = gym.make(common.ENV_NAME)
     mean_reward, std_reward = evaluate_policy(
         model, env, n_eval_episodes=10, deterministic=True
     )
