@@ -32,7 +32,29 @@ models = {
 }
 
 
-def train_more(model_name):
+def find_good_model(model_name):
+    model_class = {"A2C": A2C, "PPO": PPO, "PPO2": PPO}
+    candidate_models = [
+        model_class[model_name]("MlpPolicy", env_name, device=TORCH_DEVICE, verbose=1)
+        for i in range(10)
+    ]
+
+    best_score = -1000000
+    best_model = None
+
+    for i, model in enumerate(candidate_models):
+        model.learn(2000)
+        score = eval_model("", model)
+
+        if score > best_score:
+            print(f"New best model score: {score}")
+            best_score = score
+            best_model = model
+
+    models[model_name] = best_model
+
+
+def train_model(model_name):
     print(f"Training {model_name} model for {n_steps} steps")
     models[model_name] = models[model_name].learn(n_steps)
 
